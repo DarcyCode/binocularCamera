@@ -6,6 +6,7 @@
 #include "afxwin.h"
 #include "CameraDS.h"
 #include "CvvImage.h"
+#include "StereoCalib.h"
 
 #include <opencv.hpp>
 
@@ -51,6 +52,7 @@ private:
 	CComboBox m_ComboBoxCameraR;
 	// 左相机列表
 	CComboBox m_ComboBoxCameraL;
+	CComboBox m_CBNResolution;
 
 	// 功能函数
 	void DoShowOrigFrame(void);
@@ -60,10 +62,42 @@ public:
 	afx_msg void OnCbnSelchangeComboCamerar();
 	afx_msg void OnCbnSelchangeCbnResolution();
 private:
-	CComboBox m_CBNResolution;
+	typedef enum { CALIB_LOAD_CAMERA_PARAMS, CALIB_SINGLE_CAMERA_FIRST, CALIB_STEREO_CAMERAS_DIRECTLY } CALIB_ORDER;
+	struct OptionCameraCalib
+	{
+		int				numberBoards;		//棋盘检测次数
+		int				flagCameraCalib;	//单目定标标志符
+		int				flagStereoCalib;	//双目定标标志符
+		int				numberFrameSkip;	//角点检测的帧间间隔数
+		bool			doStereoCalib;		//是否进行双目标定
+		bool			readLocalImage;		//是否从本地读入棋盘图片
+		bool			loadConerDatas;		//是否从本地读入角点坐标数据
+		double			squareSize;			//棋盘方块大小
+		cv::Size		cornerSize;			//棋盘角点数
+		CALIB_ORDER		calibOrder;			//摄像机定标次序
+		double          alpha;              //双目校正缩放系数
+		StereoCalib::RECTIFYMETHOD	rectifyMethod;		//选择的双目校正算法
+	};
 public:
 	afx_msg void OnBnClickedBn1runcam();
 	afx_msg void OnTimer(UINT_PTR nIDEvent);
 	afx_msg void OnBnClickedBn2stopcam();
 	afx_msg void OnClose();
+	afx_msg void OnBnClickedBn2stereocalib();
+private:
+	int m_nCornerSize_X;
+	int m_nCornerSize_Y;
+	float m_nSquareSize;
+	int m_nBoards;
+	UINT m_nID_RAD;
+	double m_dAlpha;
+	StereoCalib m_stereoCalibrator;
+	CString m_workDir;
+
+	CButton* m_pCheck;
+private:
+	bool DoParseOptionsOfCameraCalib(OptionCameraCalib& opt);
+	vector<CStringA> DoSelectFiles(LPCTSTR	lpszDefExt, DWORD	dwFlags, LPCTSTR	lpszFilter, LPCWSTR	lpstrTitle, LPCWSTR	lpstrInitialDir);
+public:
+	afx_msg void OnBnClickedBnExitcameracalib();
 };
