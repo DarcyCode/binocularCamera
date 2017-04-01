@@ -7,6 +7,7 @@
 #include "CameraDS.h"
 #include "CvvImage.h"
 #include "StereoCalib.h"
+#include "StereoMatch.h"
 
 #include <opencv.hpp>
 

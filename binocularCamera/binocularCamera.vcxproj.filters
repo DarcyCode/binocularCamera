@@ -48,6 +48,9 @@
     <ClInclude Include="StereoCalib.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="StereoMatch.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="binocularCamera.cpp">
@@ -66,6 +69,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="StereoCalib.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="StereoMatch.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
