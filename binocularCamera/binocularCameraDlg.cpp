@@ -30,6 +30,21 @@ CbinocularCameraDlg::CbinocularCameraDlg(CWnd* pParent /*=NULL*/)
 	, m_nSquareSize(26.0f)
 	, m_nBoards(10)
 	, m_dAlpha(-1)
+	, m_nMinDisp(0)
+	, m_nMaxDisp(0)
+	, m_nSADWinSiz(0)
+	, m_nTextThres(0)
+	, m_nDisp12MaxDiff(0)
+	, m_nPreFiltCap(0)
+	, m_nUniqRatio(0)
+	, m_nSpeckRange(0)
+	, m_nSpeckWinSiz(0)
+	, m_bFullDP(FALSE)
+	, m_nDelayTime(5)
+	, m_bSaveFrame(FALSE)
+	, m_nViewWidth(200)
+	, m_nViewHeight(200)
+	, m_nViewDepth(200)
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 }
@@ -49,6 +64,44 @@ void CbinocularCameraDlg::DoDataExchange(CDataExchange* pDX)
 	DDV_MinMaxInt(pDX, m_nBoards, 0, 100);
 	DDX_Text(pDX, IDC_Edit_alpha_rectify, m_dAlpha);
 	DDV_MinMaxDouble(pDX, m_dAlpha, -1, 1);
+	DDX_Text(pDX, IDC_EDIT_minDisp, m_nMinDisp);
+	DDV_MinMaxInt(pDX, m_nMinDisp, -64, 16);
+	DDX_Text(pDX, IDC_EDIT_maxDisp, m_nMaxDisp);
+	DDV_MinMaxInt(pDX, m_nMaxDisp, 0, 240);
+	DDX_Text(pDX, IDC_EDIT_SADWinSiz, m_nSADWinSiz);
+	DDV_MinMaxInt(pDX, m_nSADWinSiz, 0, 21);
+	DDX_Text(pDX, IDC_EDIT_textThres, m_nTextThres);
+	DDX_Text(pDX, IDC_EDIT_disp12MaxDiff, m_nDisp12MaxDiff);
+	DDV_MinMaxInt(pDX, m_nDisp12MaxDiff, -1, 16);
+	DDX_Text(pDX, IDC_EDIT_preFiltCap, m_nPreFiltCap);
+	DDV_MinMaxInt(pDX, m_nPreFiltCap, 0, 100);
+	DDX_Text(pDX, IDC_EDIT_uniqRatio, m_nUniqRatio);
+	DDV_MinMaxInt(pDX, m_nUniqRatio, 0, 50);
+	DDX_Text(pDX, IDC_EDIT_speckRange, m_nSpeckRange);
+	DDV_MinMaxInt(pDX, m_nSpeckRange, 0, 64);
+	DDX_Text(pDX, IDC_EDIT_speckWinSiz, m_nSpeckWinSiz);
+	DDV_MinMaxInt(pDX, m_nSpeckWinSiz, 0, 200);
+	DDX_Control(pDX, IDC_SPIN_minDisp, m_spinMinDisp);
+	DDX_Control(pDX, IDC_SPIN_maxDisp, m_spinMaxDisp);
+	DDX_Control(pDX, IDC_SPIN_SADWinSiz, m_spinSADWinSiz);
+	DDX_Control(pDX, IDC_SPIN_textThres, m_spinTextThres);
+	DDX_Control(pDX, IDC_SPIN_disp12MaxDiff, m_spinDisp12MaxDiff);
+	DDX_Control(pDX, IDC_SPIN_preFiltCap, m_spinPreFiltCap);
+	DDX_Control(pDX, IDC_SPIN_uniqRatio, m_spinUniqRatio);
+	DDX_Control(pDX, IDC_SPIN_speckRange, m_spinSpeckRange);
+	DDX_Control(pDX, IDC_SPIN_speckWinSiz, m_spinSpeckWinSiz);
+	DDX_Check(pDX, IDC_CHK_fullDP, m_bFullDP);
+	DDX_Text(pDX, IDC_EDIT_DelayTime, m_nDelayTime);
+	DDX_Check(pDX, IDC_CHK_SaveAsVideo, m_bSaveFrame);
+	DDX_Text(pDX, IDC_EDIT_viewWidth, m_nViewWidth);
+	DDX_Text(pDX, IDC_EDIT_viewHeight, m_nViewHeight);
+	DDX_Text(pDX, IDC_EDIT_viewDepth, m_nViewDepth);
+	DDV_MinMaxInt(pDX, m_nViewWidth, 60, 600);
+	DDV_MinMaxInt(pDX, m_nViewHeight, 40, 400);
+	DDV_MinMaxInt(pDX, m_nViewDepth, 60, 600);
+	DDX_Control(pDX, IDC_SPIN_viewWidth, m_spinViewWidth);
+	DDX_Control(pDX, IDC_SPIN_viewHeight, m_spinViewHeight);
+	DDX_Control(pDX, IDC_SPIN_viewDepth, m_spinViewDepth);
 }
 
 BEGIN_MESSAGE_MAP(CbinocularCameraDlg, CDialogEx)
@@ -63,6 +116,18 @@ BEGIN_MESSAGE_MAP(CbinocularCameraDlg, CDialogEx)
 	ON_WM_CLOSE()
 	ON_BN_CLICKED(IDC_BN2StereoCalib, &CbinocularCameraDlg::OnBnClickedBn2stereocalib)
 	ON_BN_CLICKED(IDC_BN_ExitCameraCalib, &CbinocularCameraDlg::OnBnClickedBnExitcameracalib)
+	ON_BN_CLICKED(IDC_BN_StereoDefParam, &CbinocularCameraDlg::OnBnClickedBnStereodefparam)
+	ON_BN_CLICKED(IDC_BN_CompDisp, &CbinocularCameraDlg::OnBnClickedBnCompdisp)
+	ON_BN_CLICKED(IDC_BN_StopDispComp, &CbinocularCameraDlg::OnBnClickedBnStopdispcomp)
+	ON_BN_CLICKED(IDC_RAD_BM, &CbinocularCameraDlg::OnBnClickedRadBm)
+	ON_BN_CLICKED(IDC_RAD_SGBM, &CbinocularCameraDlg::OnBnClickedRadSgbm)
+	ON_BN_CLICKED(IDC_BTN_DefaultViewField, &CbinocularCameraDlg::OnBnClickedBtnDefaultviewfield)
+	ON_NOTIFY(UDN_DELTAPOS, IDC_SPIN_maxDisp, &CbinocularCameraDlg::OnDeltaposSpinmaxdisp)
+	ON_NOTIFY(UDN_DELTAPOS, IDC_SPIN_SADWinSiz, &CbinocularCameraDlg::OnDeltaposSpinSadwinsiz)
+	ON_NOTIFY(UDN_DELTAPOS, IDC_SPIN_speckRange, &CbinocularCameraDlg::OnDeltaposSpinspeckrange)
+	ON_NOTIFY(UDN_DELTAPOS, IDC_SPIN_viewWidth, &CbinocularCameraDlg::OnDeltaposSpinviewwidth)
+	ON_NOTIFY(UDN_DELTAPOS, IDC_SPIN_viewHeight, &CbinocularCameraDlg::OnDeltaposSpinviewheight)
+	ON_NOTIFY(UDN_DELTAPOS, IDC_SPIN_viewDepth, &CbinocularCameraDlg::OnDeltaposSpinviewdepth)
 END_MESSAGE_MAP()
 
 
@@ -78,6 +143,13 @@ BOOL CbinocularCameraDlg::OnInitDialog()
 	SetIcon(m_hIcon, FALSE);		// 设置小图标
 
 	// TODO: 在此添加额外的初始化代码
+	// 获取程序工作路径
+	m_workDir = F_InitWorkDir();
+	m_stereoCalibrator.setWorkDir(CStringA(m_workDir).GetBuffer(0));
+
+	// 默认图像处理方法为显示原始图像
+//	m_ProcMethod = SHOW_ORIGINAL_FRAME;
+
 	// 获取摄像头数目
 	m_nCamCount = CCameraDS::CameraCount();
 	if( m_nCamCount < 1 )
@@ -106,22 +178,18 @@ BOOL CbinocularCameraDlg::OnInitDialog()
 			AfxMessageBox(_T("不能获取摄像头的名称"));
 	}
 	camstr.ReleaseBuffer();
-	if (m_nCamCount <= 1)
-		m_ComboBoxCameraR.EnableWindow(FALSE);
+
+//	m_CBNResolution.SetCurSel(1);
 
 	// 使一系列按钮失效
 	GetDlgItem( IDC_BN1RunCam )->EnableWindow( FALSE );			// 启动摄像头失效
 	GetDlgItem( IDC_BN2StopCam )->EnableWindow( FALSE );		// 停止摄像头失效
-	// 初始化图像显示控件的图像
-	CRect rect;
-	GetDlgItem(IDC_PicLfCam) ->GetClientRect( &rect );
-	m_lfImage = Mat::zeros(rect.Height(), rect.Width(), CV_8UC3);
-	GetDlgItem(IDC_PicRiCam) ->GetClientRect( &rect );
-	m_riImage = Mat::zeros(rect.Height(), rect.Width(), CV_8UC3);
-	
+	GetDlgItem(IDC_BN_StopDispComp)->EnableWindow(FALSE);		// 停止视差计算失效
+	GetDlgItem(IDC_EDIT_disp12MaxDiff)->EnableWindow(FALSE);	// 左右视差图检验失效
+
+	// 设置标定相关参数
 	CheckRadioButton(IDC_RAD_CalibFromCam, IDC_RAD_CalibFromImg, IDC_RAD_CalibFromCam);
 	CheckRadioButton(IDC_RAD_Load1CamCalibResult, IDC_RAD_StereoCalib, IDC_RAD_Calib1CamFirst);
-	CheckRadioButton(IDC_RAD_BOUGUET, IDC_RAD_HARTLEY, IDC_RAD_BOUGUET);				// 默认使用BOUGUET方法双目校正
 
 	m_pCheck = (CButton*)GetDlgItem(IDC_CHK_ShowCalibResult);
 	m_pCheck->SetCheck(1);
@@ -143,7 +211,49 @@ BOOL CbinocularCameraDlg::OnInitDialog()
 	m_pCheck->SetCheck(1);
 	m_pCheck = (CButton*)GetDlgItem(IDC_CHK5FI);
 	m_pCheck->SetCheck(0);
+	// 初始化双目匹配区域控件设置
+	CheckRadioButton(IDC_RAD_BOUGUET, IDC_RAD_HARTLEY, IDC_RAD_BOUGUET);				// 默认使用BOUGUET方法双目校正
+	CheckRadioButton(IDC_RAD_SGBM, IDC_RAD_BM, IDC_RAD_BM);								// 默认使用 BM 算法计算视差
+	CheckRadioButton(IDC_RAD_DispFromImg, IDC_RAD_DispFromCam, IDC_RAD_DispFromCam);	// 默认从摄像机获取图像
+	
+	CheckRadioButton(IDC_RAD_ColorDisp, IDC_RAD_SideView, IDC_RAD_ColorDisp);			// 默认显示彩色视差图
+	m_pCheck = (CButton*)GetDlgItem(IDC_CHK_StereoRectify);								// 默认执行双目校正
+	m_pCheck->SetCheck(1);
+	m_pCheck = (CButton*)GetDlgItem(IDC_CHK_ProjTo3D);			// 默认执行双目测距
+	m_pCheck->SetCheck(1);
 	m_pCheck = NULL;
+
+	m_nViewWidth = 200;
+	m_nViewHeight = 200;
+	m_nViewDepth = 200;
+	m_nMaxDisp = 0;
+	m_nSADWinSiz =0;
+	m_nPreFiltCap =0;
+	m_nSpeckRange = 0;
+	m_nDelayTime = 5;
+	m_spinMinDisp.SetRange(-64, 16);
+	m_spinMaxDisp.SetRange(0, 240);
+	m_spinSADWinSiz.SetRange(0, 21);
+	m_spinTextThres.SetRange(0, 50);
+	m_spinDisp12MaxDiff.SetRange(-1, 36);
+	m_spinPreFiltCap.SetRange(0, 100);
+	m_spinUniqRatio.SetRange(0, 50);
+	m_spinSpeckRange.SetRange(0, 64);
+	m_spinSpeckWinSiz.SetRange(0, 200);
+	m_spinViewWidth.SetRange(60, 600);
+	m_spinViewHeight.SetRange(40, 400);
+	m_spinViewDepth.SetRange(60, 600);
+
+	UpdateData( FALSE );
+
+	// 初始化图像显示控件的图像
+	CRect rect;
+	GetDlgItem(IDC_PicLfCam) ->GetClientRect( &rect );
+	m_lfImage = Mat::zeros(rect.Height(), rect.Width(), CV_8UC3);
+	GetDlgItem(IDC_PicRiCam) ->GetClientRect( &rect );
+	m_riImage = Mat::zeros(rect.Height(), rect.Width(), CV_8UC3);
+	GetDlgItem(IDC_PicSynImg) ->GetClientRect( &rect );
+	m_disparity = Mat::zeros(rect.Height(), rect.Width(), CV_8UC3);
 	
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
@@ -179,6 +289,7 @@ void CbinocularCameraDlg::OnPaint()
 		{
 			F_ShowImage( m_lfImage, m_lfImage, IDC_PicLfCam );		// 重绘图片函数
 			F_ShowImage( m_riImage, m_riImage, IDC_PicRiCam );		// 重绘图片函数
+			F_ShowImage( m_disparity, m_disparity, IDC_PicSynImg );	// 重绘图片函数
 		}
 	}
 }
@@ -286,7 +397,7 @@ void CbinocularCameraDlg::OnBnClickedBn1runcam()
 		riCam.set(CV_CAP_PROP_FRAME_WIDTH,  m_nImageWidth);
 		riCam.set(CV_CAP_PROP_FRAME_HEIGHT, m_nImageHeight);
 
-		// GetDlgItem( IDC_BN_CompDisp )->EnableWindow( TRUE );
+		GetDlgItem( IDC_BN_CompDisp )->EnableWindow( TRUE );
 	}
 
 	// 使部分按钮生效
@@ -955,4 +1066,734 @@ void CbinocularCameraDlg::OnBnClickedBnExitcameracalib()
 	::PostMessage(this->m_hWnd, WM_QUIT, 0, 0);
 	// 禁用停止角点检测按钮
 	GetDlgItem(IDC_BN_ExitCameraCalib)->EnableWindow(FALSE);
+}
+
+
+void CbinocularCameraDlg::OnBnClickedBnStereodefparam()
+{
+	// TODO: 在此添加控件通知处理程序代码
+	m_nID_RAD = GetCheckedRadioButton(IDC_RAD_SGBM, IDC_RAD_BM);
+	if (m_nID_RAD == IDC_RAD_BM)
+	{
+		m_nMinDisp = 0;	
+		m_nMaxDisp = 64;
+		m_nSADWinSiz = 19;
+		m_nTextThres = 10;
+		m_nDisp12MaxDiff = -1;
+		m_nPreFiltCap = 31;
+		m_nUniqRatio = 25;
+		m_nSpeckRange = 32;
+		m_nSpeckWinSiz = 100;
+	} 
+	else if(m_nID_RAD == IDC_RAD_SGBM)
+	{
+		m_nMinDisp = 0;	
+		m_nMaxDisp = 64;
+		m_nSADWinSiz = 7;
+		m_nDisp12MaxDiff = -1;
+		m_nPreFiltCap = 63;
+		m_nUniqRatio = 25;
+		m_nSpeckRange = 32;
+		m_nSpeckWinSiz = 100;
+		m_pCheck = (CButton*)GetDlgItem(IDC_CHK_fullDP);
+		m_pCheck->SetCheck(0);
+	}
+	UpdateData(FALSE);
+}
+
+
+void CbinocularCameraDlg::OnBnClickedBnCompdisp()
+{
+	// TODO: 在此添加控件通知处理程序代码
+	// 读入界面中的立体匹配选项设置
+	OptionStereoMatch optMatch;
+	if (!DoParseOptionsOfStereoMatch( optMatch )) 
+		return;
+
+	// 暂停显示摄像头画面的操作
+	KillTimer(1);			
+
+	GetDlgItem(IDC_BN_StopDispComp)->EnableWindow(TRUE);
+	GetDlgItem(IDC_RAD_BM)->EnableWindow(FALSE);
+	GetDlgItem(IDC_RAD_SGBM)->EnableWindow(FALSE);
+	GetDlgItem(IDC_BN2StopCam)->EnableWindow(FALSE);
+	GetDlgItem(IDC_BN_CompDisp)->EnableWindow(FALSE);
+	GetDlgItem(IDC_BN2StereoCalib)->EnableWindow(FALSE);
+//	GetDlgItem(IDC_CBN2MethodList)->EnableWindow(FALSE);
+
+	//////////////////////////////////////////////////////////////////////////
+	// 参数初始化
+	CStringA xmlPath;			// 定标结果数据文件
+	vector<CStringA> imgFiles1; //左右视图文件路径序列
+	vector<CStringA> imgFiles2;	
+	int i = 0, j = 0;
+	const char* img1_filename = NULL;
+	const char* img2_filename = NULL;
+	const char* xml_filename = NULL;
+
+	cv::Mat img1, img2, img1p, img2p, disp, disp8u, pointCloud;
+	LPCTSTR errMsg;
+
+	try 
+	{
+		//////////////////////////////////////////////////////////////////////////
+		// 选择/预载图像（摄像机 or 本地图片）
+		if (optMatch.readLocalImage)
+		{
+			// 选择左视图
+			imgFiles1 = DoSelectFiles(
+				_T("*.bmp"), 
+				OFN_ENABLESIZING |OFN_EXPLORER | OFN_ALLOWMULTISELECT | OFN_HIDEREADONLY,
+				_T("image files (*.bmp; *.png; *.jpg) |*.bmp; *.png; *.jpg; *.jpeg| All Files (*.*) |*.*||"),
+				_T("选择左视图图像"),
+				m_workDir
+				);
+			// 选择右视图
+			imgFiles2 = DoSelectFiles(
+				_T("*.bmp"), 
+				OFN_ENABLESIZING |OFN_EXPLORER | OFN_ALLOWMULTISELECT | OFN_HIDEREADONLY,
+				_T("image files (*.bmp; *.png; *.jpg) |*.bmp; *.png; *.jpg; *.jpeg| All Files (*.*) |*.*||"),
+				_T("选择右视图图像"),
+				m_workDir
+				);
+
+			if( imgFiles1.empty() || imgFiles2.empty() )	
+			{
+				errMsg = _T("没有选中有效的图像文件!");
+				throw errMsg;
+			}
+
+			img1_filename = imgFiles1[0];
+			img2_filename = imgFiles2[0];
+			img1 = imread(img1_filename);
+			img2 = imread(img2_filename);
+		} 
+		else
+		{
+			lfCam >> img1;
+			riCam >> img2;
+		}
+
+		//////////////////////////////////////////////////////////////////////////
+		// 读取双目校正变换参数
+		if( optMatch.useStereoRectify )
+		{
+			// 打开摄像头定标参数文件
+			vector<CStringA> xmlFiles;
+			xmlFiles = DoSelectFiles(
+				_T("*.xml"), 
+				OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST | OFN_HIDEREADONLY,
+				_T("XML/YML file (*.xml; *.yml) |*.xml; *.yml | All Files (*.*) |*.*||"), 
+				_T("选择摄像头定标参数文件"),
+				m_workDir
+				);
+			if( xmlFiles.empty() )	
+			{
+				errMsg = _T("没有选中有效的摄像头定标参数文件!");			
+				throw errMsg;
+			}
+			xmlPath = xmlFiles[0];			// 获取xml文件路径
+			xml_filename = xmlPath;
+
+			// 读入摄像头定标参数
+			switch (m_stereoMatcher.init(img1.cols, img1.rows, xml_filename))
+			{
+			case 0:
+			case -99:
+				errMsg = _T("读取摄像头定标参数文件失败，请重新选择!");			
+				throw errMsg;
+			case -1:
+				errMsg = _T("定标参数的图像尺寸与当前配置的图像尺寸不一致，请重新选择!");			
+				throw errMsg;
+			case -2:
+				if (optMatch.generatePointCloud)
+				{
+					optMatch.generatePointCloud = false;
+					errMsg = _T("定标文件对应的校正方法不是 BOUGUET 方法，无法生成三维点云!");			
+					throw errMsg;
+				}
+				break;
+			}
+
+		}	
+		else
+			m_stereoMatcher.init(img1.cols, img1.rows, "");
+
+		//////////////////////////////////////////////////////////////////////////
+		// 开始计算图像视差
+		m_stereoMatcher.m_BM.state->disp12MaxDiff = m_nDisp12MaxDiff;
+		m_stereoMatcher.m_SGBM.disp12MaxDiff = m_nDisp12MaxDiff;
+
+		int frameCount = 0;	//图像计数
+		PointCloudAnalyzer pointCloudAnalyzer;
+		clock_t tShowObjInfo = clock(), tStart, tPerFrame;
+		CStringA strPerFrame;
+		MSG msg;
+		while(true)
+		{
+			tStart = clock();
+
+			// MFC 窗口消息处理
+			if(::PeekMessage(&msg, this->m_hWnd, 0, 0, PM_REMOVE)) 
+			{ 
+				if(msg.message == WM_QUIT) 
+				{ 
+					break; 
+				}	
+				::TranslateMessage(&msg); 
+				::DispatchMessage(&msg);
+			}
+
+			// 载入图像
+			if (optMatch.readLocalImage)
+			{
+				if (frameCount >= MIN(imgFiles1.size(), imgFiles2.size()))
+					break;
+				img1_filename = imgFiles1[frameCount];
+				img2_filename = imgFiles2[frameCount];
+				img1 = imread(img1_filename, 1);
+				img2 = imread(img2_filename, 1);
+				if(img1.empty() || img2.empty()) break;
+				frameCount++;
+			} 
+			else
+			{
+				lfCam >> img1;
+				riCam >> img2;
+				if(img1.empty()) break;
+			}
+
+			/*
+			if (m_ProcMethod)
+			{
+				DoFrameProc(img1, img1);
+				DoFrameProc(img2, img2);
+			}
+*/ 
+			// 执行双目匹配
+			if (optMatch.stereoMethod == STEREO_BM)
+			{
+				DoUpdateStateBM();
+				m_stereoMatcher.bmMatch(img1, img2, disp, img1p, img2p);
+			} 
+			else if (optMatch.stereoMethod == STEREO_SGBM)
+			{
+				DoUpdateStateSGBM(img1.channels());
+				m_stereoMatcher.sgbmMatch(img1, img2, disp, img1p, img2p);
+			}
+
+			// 画出等距的若干条横线，以比对 行对准 情况
+			for( j = 0; j < img1p.rows; j += 32 )		
+			{
+				line( img1p, cvPoint(0,j),	cvPoint(img1p.cols,j), CV_RGB(0,255,0)); 
+				line( img2p, cvPoint(0,j),	cvPoint(img2p.cols,j), CV_RGB(0,255,0)); 
+			}
+
+			// 检测离摄像头最近的物体？
+			if ( optMatch.generatePointCloud )
+			{
+				m_stereoMatcher.getPointClouds(disp, pointCloud);
+
+				vector<PointCloudAnalyzer::ObjectInfo> objectInfos;
+				pointCloudAnalyzer.detectNearObject(img1p, pointCloud, objectInfos);
+
+				if (!objectInfos.empty() && (clock()-tShowObjInfo) > 500)
+				{
+					tShowObjInfo = clock();
+					double fl = m_stereoMatcher.m_FL;
+					m_ObjectDistance = objectInfos[0].distance; m_ObjectDistance = (int)(m_ObjectDistance * 10000) / 10000.;
+					m_ObjectHeight = objectInfos[0].boundRect.height * objectInfos[0].distance / fl; m_ObjectHeight = (int)(m_ObjectHeight * 10000) / 10000.;
+					m_ObjectWidth = objectInfos[0].boundRect.width * objectInfos[0].distance / fl; m_ObjectWidth = (int)(m_ObjectWidth * 10000) / 10000.;
+					m_ObjectDisparity = disp.at<short>(objectInfos[0].nearest) / 16.;
+					UpdateData(FALSE);
+				}
+			}
+
+			tPerFrame = clock() - tStart;
+			strPerFrame.Format("（每帧 %d ms）", tPerFrame);
+
+			// 切换视差图/视场图
+			UpdateData(TRUE);
+			m_stereoMatcher.setViewField(m_nViewWidth, m_nViewHeight, m_nViewDepth);
+			m_nID_RAD = GetCheckedRadioButton(IDC_RAD_ColorDisp, IDC_RAD_SideView);
+			switch ( m_nID_RAD )
+			{
+			case IDC_RAD_ColorDisp:
+				m_stereoMatcher.getDisparityImage(disp, disp8u, true);
+				GetDlgItem(IDC_STATIC_DispView)->SetWindowText(_T("彩色视差图") + CStringW(strPerFrame));
+				break;
+			case IDC_RAD_GrayDisp:
+				m_stereoMatcher.getDisparityImage(disp, disp8u, false);
+				GetDlgItem(IDC_STATIC_DispView)->SetWindowText(_T("灰度视差图") + CStringW(strPerFrame));
+				break;
+			case IDC_RAD_TopDownView:
+				if ( optMatch.generatePointCloud )
+				{
+					m_stereoMatcher.getTopDownView(pointCloud, disp8u, img1);
+					GetDlgItem(IDC_STATIC_DispView)->SetWindowText(_T("环境俯视图") + CStringW(strPerFrame));
+				}
+				else
+				{
+					CheckRadioButton(IDC_RAD_ColorDisp, IDC_RAD_SideView, IDC_RAD_ColorDisp);			// 默认显示彩色视差图
+					m_stereoMatcher.getDisparityImage(disp, disp8u, true);
+				}
+				break;
+			case IDC_RAD_SideView:
+				if ( optMatch.generatePointCloud )
+				{
+					m_stereoMatcher.getSideView(pointCloud, disp8u, img1);
+					GetDlgItem(IDC_STATIC_DispView)->SetWindowText(_T("环境侧视图") + CStringW(strPerFrame));
+				}
+				else
+				{
+					CheckRadioButton(IDC_RAD_ColorDisp, IDC_RAD_SideView, IDC_RAD_ColorDisp);			// 默认显示彩色视差图
+					m_stereoMatcher.getDisparityImage(disp, disp8u, true);
+				}
+				break;
+			default:
+				m_stereoMatcher.getDisparityImage(disp, disp8u, true);
+			}            
+			UpdateData(FALSE);
+
+			// 传送至MFC界面显示
+			F_ShowImage( img1p, m_lfImage, IDC_PicLfCam );
+			F_ShowImage( img2p, m_riImage, IDC_PicRiCam );
+			F_ShowImage( disp8u, m_disparity, IDC_PicSynImg );	
+
+			// 保存画面和视差图像
+			if( optMatch.saveResults )
+				F_Saveframe( img1, img2, disp);
+
+			if( optMatch.delayEachFrame )
+				Sleep(m_nDelayTime * 1000);
+		}
+
+		// 保存最后一帧景深图像的点云数据
+		if ( optMatch.generatePointCloud )
+		{
+			CStringA filePath(m_workDir);
+			filePath.AppendFormat("PointsClouds.txt");
+			m_stereoMatcher.savePointClouds(pointCloud, filePath.GetBuffer(0));
+			filePath.ReleaseBuffer();
+		}
+
+		// 对图像数据清零
+		m_disparity = Scalar(0);
+		F_ShowImage( m_disparity, m_disparity, IDC_PicSynImg );
+
+		// 释放内存
+		xmlPath.ReleaseBuffer();
+	}
+	catch (LPCTSTR ErrMsg)
+	{
+		AfxMessageBox(ErrMsg);
+	}
+	catch (cv::Exception& e)
+	{
+		char err[2048];
+		sprintf_s(err, "发生错误: %s", e.what());
+		CStringW errInfo(err);
+		AfxMessageBox(errInfo);
+	}
+	catch (...)
+	{
+		AfxMessageBox(_T("发生未知错误！"));
+	}
+
+	GetDlgItem(IDC_RAD_BM)->EnableWindow(TRUE);
+	GetDlgItem(IDC_RAD_SGBM)->EnableWindow(TRUE);
+	GetDlgItem(IDC_BN2StopCam)->EnableWindow(TRUE);
+	GetDlgItem(IDC_BN_CompDisp)->EnableWindow(TRUE);
+	GetDlgItem(IDC_BN2StereoCalib)->EnableWindow(TRUE);
+//	GetDlgItem(IDC_CBN2MethodList)->EnableWindow(TRUE);
+	GetDlgItem(IDC_BN_StopDispComp)->EnableWindow(FALSE);
+	GetDlgItem(IDC_STATIC_DispView)->SetWindowText(_T("视差图"));
+
+	// 返回显示实时画面
+	DoShowOrigFrame();
+	return;
+}
+
+void CbinocularCameraDlg::F_Saveframe(Mat& lfImg, Mat&riImg, Mat& lfDisp)
+{
+	static int nSavedFrames = 0;
+
+	CStringA lfImgName(m_workDir), riImgName(m_workDir), lfDispName(m_workDir), xmlName(m_workDir);
+	lfImgName.AppendFormat("Imgs\\SaveFrame\\left_%02d.png", nSavedFrames);
+	riImgName.AppendFormat("Imgs\\SaveFrame\\right_%02d.png", nSavedFrames);
+	lfDispName.AppendFormat("Imgs\\SaveFrame\\disp_%02d.png", nSavedFrames);
+	xmlName.AppendFormat("Imgs\\SaveFrame\\disp_%02d.txt", nSavedFrames);
+	nSavedFrames++;
+
+	try
+	{
+		imwrite( lfImgName.GetBuffer(0), lfImg);
+		imwrite( riImgName.GetBuffer(0), riImg);
+		imwrite( lfDispName.GetBuffer(0), lfDisp);
+
+		FILE* fp;
+		fopen_s(&fp, xmlName.GetBuffer(0), "wt");
+		fprintf(fp, "%d\n", lfDisp.rows);
+		fprintf(fp, "%d\n", lfDisp.cols);
+		for(int y = 0; y < lfDisp.rows; y++)
+		{
+			for(int x = 0; x < lfDisp.cols; x++)
+			{
+				short disp = lfDisp.at<short>(y, x);	
+				fprintf(fp, "%d\n", disp);
+			}
+		}
+
+		fclose(fp);
+	}
+	catch (...)
+	{
+	}
+
+	lfDispName.ReleaseBuffer();
+	lfImgName.ReleaseBuffer();
+	riImgName.ReleaseBuffer();
+	xmlName.ReleaseBuffer();
+}
+
+void CbinocularCameraDlg::DoUpdateStateBM(void)
+{
+	UpdateData(TRUE);
+	m_stereoMatcher.m_BM.state->preFilterCap = m_nPreFiltCap;
+	m_stereoMatcher.m_BM.state->SADWindowSize = m_nSADWinSiz;
+	m_stereoMatcher.m_BM.state->minDisparity = m_nMinDisp;
+	m_stereoMatcher.m_BM.state->numberOfDisparities = m_nMaxDisp;
+	m_stereoMatcher.m_BM.state->textureThreshold = m_nTextThres;
+	m_stereoMatcher.m_BM.state->uniquenessRatio = m_nUniqRatio;
+	m_stereoMatcher.m_BM.state->speckleWindowSize = m_nSpeckWinSiz;
+	m_stereoMatcher.m_BM.state->speckleRange = m_nSpeckRange;
+}
+
+void CbinocularCameraDlg::DoUpdateStateSGBM(int imgChannels)
+{
+	UpdateData(TRUE);
+	m_stereoMatcher.m_SGBM.preFilterCap = m_nPreFiltCap;
+	m_stereoMatcher.m_SGBM.SADWindowSize = m_nSADWinSiz;
+	m_stereoMatcher.m_SGBM.P1 =  8 * imgChannels * m_nSADWinSiz * m_nSADWinSiz;
+	m_stereoMatcher.m_SGBM.P2 = 32 * imgChannels * m_nSADWinSiz * m_nSADWinSiz;
+	m_stereoMatcher.m_SGBM.minDisparity = m_nMinDisp;
+	m_stereoMatcher.m_SGBM.numberOfDisparities = m_nMaxDisp;
+	m_stereoMatcher.m_SGBM.uniquenessRatio = m_nUniqRatio;
+	m_stereoMatcher.m_SGBM.speckleWindowSize = m_nSpeckWinSiz;
+	m_stereoMatcher.m_SGBM.speckleRange = m_nSpeckRange;
+	m_stereoMatcher.m_SGBM.fullDP = m_bFullDP;
+}
+
+bool CbinocularCameraDlg::DoParseOptionsOfStereoMatch(OptionStereoMatch& opt)
+{
+	bool res = UpdateData(TRUE);
+	if (!res)
+		return false;
+
+	if (m_nMaxDisp==0)
+	{
+		AfxMessageBox(_T("请先输入匹配算法参数"));
+		return false;
+	}
+
+	// 确认计算视差的算法
+	m_nID_RAD = GetCheckedRadioButton(IDC_RAD_BM, IDC_RAD_SGBM);
+	opt.stereoMethod = m_nID_RAD == IDC_RAD_BM ? STEREO_BM :
+		m_nID_RAD == IDC_RAD_SGBM ? STEREO_SGBM : STEREO_BM;
+	// 确认左右视图的来源（摄像头 or 本地图片）
+	m_nID_RAD = GetCheckedRadioButton(IDC_RAD_DispFromCam, IDC_RAD_DispFromImg);
+	opt.readLocalImage = m_nID_RAD == IDC_RAD_DispFromImg;
+	// 确认是否执行双目校正
+	m_pCheck = (CButton*)GetDlgItem(IDC_CHK_StereoRectify);
+	opt.useStereoRectify = m_pCheck->GetCheck() > 0;
+	// 确认是否保存匹配结果
+	m_pCheck = (CButton*)GetDlgItem(IDC_CHK_SaveAsVideo);
+	opt.saveResults = m_pCheck->GetCheck() > 0;
+	// 确认是否延时显示匹配效果
+	m_pCheck = (CButton*)GetDlgItem(IDC_CHK_DelayProc);
+	opt.delayEachFrame = m_pCheck->GetCheck() > 0;
+	if (opt.readLocalImage)
+	{
+		opt.delayEachFrame = true;
+		m_pCheck->SetCheck(1);
+	}
+	// 确认是否生成三维点云
+	m_pCheck = (CButton*)GetDlgItem(IDC_CHK_ProjTo3D);
+	opt.generatePointCloud = m_pCheck->GetCheck() > 0;
+
+	return true;
+}
+
+
+void CbinocularCameraDlg::OnBnClickedBnStopdispcomp()
+{
+	// TODO: 在此添加控件通知处理程序代码
+
+	// 发送退出消息
+	::PostMessage(this->m_hWnd, WM_QUIT, 0, 0);
+	GetDlgItem(IDC_BN_StopDispComp)->EnableWindow(FALSE);
+
+	if (lfCam.isOpened() || riCam.isOpened())
+	{
+		// 启用部分按钮
+		GetDlgItem(IDC_BN2StopCam)->EnableWindow(TRUE);
+		GetDlgItem(IDC_BN2StereoCalib)->EnableWindow(TRUE);
+		GetDlgItem(IDC_BN_CompDisp)->EnableWindow(TRUE);
+		GetDlgItem(IDC_RAD_BM)->EnableWindow(TRUE);
+		GetDlgItem(IDC_RAD_SGBM)->EnableWindow(TRUE);
+	}
+
+	return;
+}
+
+
+void CbinocularCameraDlg::OnBnClickedRadBm()
+{
+	// TODO: 在此添加控件通知处理程序代码
+	DoClearParamsOfStereoMatch();
+	m_spinPreFiltCap.SetRange(0, 31);
+	GetDlgItem(IDC_EDIT_minDisp)->EnableWindow(TRUE);
+	GetDlgItem(IDC_EDIT_maxDisp)->EnableWindow(TRUE);
+	GetDlgItem(IDC_EDIT_SADWinSiz)->EnableWindow(TRUE);
+	GetDlgItem(IDC_EDIT_textThres)->EnableWindow(TRUE);
+	GetDlgItem(IDC_EDIT_disp12MaxDiff)->EnableWindow(FALSE);
+	GetDlgItem(IDC_EDIT_preFiltCap)->EnableWindow(TRUE);
+	GetDlgItem(IDC_EDIT_uniqRatio)->EnableWindow(TRUE);
+	GetDlgItem(IDC_EDIT_speckRange)->EnableWindow(TRUE);
+	GetDlgItem(IDC_EDIT_speckWinSiz)->EnableWindow(TRUE);
+	GetDlgItem(IDC_CHK_fullDP)->EnableWindow(FALSE);
+}
+
+
+void CbinocularCameraDlg::OnBnClickedRadSgbm()
+{
+	// TODO: 在此添加控件通知处理程序代码
+	DoClearParamsOfStereoMatch();
+	m_spinPreFiltCap.SetRange(0, 100);
+	GetDlgItem(IDC_EDIT_minDisp)->EnableWindow(TRUE);
+	GetDlgItem(IDC_EDIT_maxDisp)->EnableWindow(TRUE);
+	GetDlgItem(IDC_EDIT_SADWinSiz)->EnableWindow(TRUE);
+	GetDlgItem(IDC_EDIT_textThres)->EnableWindow(FALSE);
+	GetDlgItem(IDC_EDIT_disp12MaxDiff)->EnableWindow(FALSE);
+	GetDlgItem(IDC_EDIT_preFiltCap)->EnableWindow(TRUE);
+	GetDlgItem(IDC_EDIT_uniqRatio)->EnableWindow(TRUE);
+	GetDlgItem(IDC_EDIT_speckRange)->EnableWindow(TRUE);
+	GetDlgItem(IDC_EDIT_speckWinSiz)->EnableWindow(TRUE);
+	GetDlgItem(IDC_CHK_fullDP)->EnableWindow(TRUE);
+}
+
+void CbinocularCameraDlg::DoClearParamsOfStereoMatch(void)
+{
+	m_nMinDisp = 0;	
+	m_nMaxDisp = 0;
+	m_nSADWinSiz = 0;
+	m_nTextThres = 0;
+	m_nDisp12MaxDiff = -1;
+	m_nPreFiltCap = 0;
+	m_nUniqRatio = 0;
+	m_nSpeckRange = 0;
+	m_nSpeckWinSiz = 0;
+	m_pCheck = (CButton*)GetDlgItem(IDC_CHK_fullDP);
+	m_pCheck->SetCheck(0);
+	UpdateData(FALSE);
+	return;
+}
+
+
+void CbinocularCameraDlg::OnBnClickedBtnDefaultviewfield()
+{
+	// TODO: 在此添加控件通知处理程序代码
+	m_nViewWidth = 200;
+	m_nViewHeight = 200;
+	m_nViewDepth = 200;
+	UpdateData(FALSE);
+}
+
+
+void CbinocularCameraDlg::OnDeltaposSpinmaxdisp(NMHDR *pNMHDR, LRESULT *pResult)
+{
+	LPNMUPDOWN pNMUpDown = reinterpret_cast<LPNMUPDOWN>(pNMHDR);
+	// TODO: 在此添加控件通知处理程序代码
+	*pResult = 0;
+
+	UpdateData(TRUE);
+
+	m_nMaxDisp += (int)pNMUpDown->iDelta * 16;
+	if(m_nMaxDisp<16) 
+		m_nMaxDisp = 16;
+	if(m_nMaxDisp>240)
+		m_nMaxDisp = 240;
+
+	UpdateData(FALSE);
+}
+
+
+void CbinocularCameraDlg::OnDeltaposSpinSadwinsiz(NMHDR *pNMHDR, LRESULT *pResult)
+{
+	LPNMUPDOWN pNMUpDown = reinterpret_cast<LPNMUPDOWN>(pNMHDR);
+	// TODO: 在此添加控件通知处理程序代码
+	*pResult = 0;
+
+	m_nID_RAD = GetCheckedRadioButton(IDC_RAD_BM, IDC_RAD_SGBM);
+	if (m_nID_RAD == IDC_RAD_BM)
+	{
+		UpdateData(TRUE);
+		m_nSADWinSiz += (int)pNMUpDown->iDelta * 2; 
+		if(m_nSADWinSiz % 2 == 0)
+			m_nSADWinSiz += 1;
+		if(m_nSADWinSiz < 5)
+			m_nSADWinSiz = 5;
+		if(m_nSADWinSiz > 21)
+			m_nSADWinSiz = 21;
+		UpdateData(FALSE);
+	}
+	else if (m_nID_RAD == IDC_RAD_SGBM)
+	{
+		UpdateData(TRUE);
+		m_nSADWinSiz += (int)pNMUpDown->iDelta * 2;
+		if(m_nSADWinSiz % 2 == 0)
+			m_nSADWinSiz += 1;
+		if(m_nSADWinSiz < 1)
+			m_nSADWinSiz = 1;
+		if(m_nSADWinSiz > 11)
+			m_nSADWinSiz = 11;
+		UpdateData(FALSE);
+	}
+}
+
+
+void CbinocularCameraDlg::OnDeltaposSpinspeckrange(NMHDR *pNMHDR, LRESULT *pResult)
+{
+	LPNMUPDOWN pNMUpDown = reinterpret_cast<LPNMUPDOWN>(pNMHDR);
+	// TODO: 在此添加控件通知处理程序代码
+	*pResult = 0;
+	m_nID_RAD = GetCheckedRadioButton(IDC_RAD_BM, IDC_RAD_SGBM);
+	if (m_nID_RAD == IDC_RAD_BM)
+	{
+		UpdateData(TRUE);
+		m_nSpeckRange += (int)pNMUpDown->iDelta;
+		if(m_nSpeckRange < 0)
+			m_nSpeckRange = 0;
+		if(m_nSpeckRange > 64)
+			m_nSpeckRange = 64;
+		UpdateData(FALSE);
+	}
+	else if (m_nID_RAD == IDC_RAD_SGBM)
+	{
+		UpdateData(TRUE);
+		m_nSpeckRange += (int)pNMUpDown->iDelta * 16;
+		if(m_nSpeckRange < 0)
+			m_nSpeckRange = 0;
+		if(m_nSpeckRange > 64)
+			m_nSpeckRange = 64;
+		UpdateData(FALSE);
+	}
+
+}
+
+
+void CbinocularCameraDlg::OnDeltaposSpinviewwidth(NMHDR *pNMHDR, LRESULT *pResult)
+{
+	LPNMUPDOWN pNMUpDown = reinterpret_cast<LPNMUPDOWN>(pNMHDR);
+	// TODO: 在此添加控件通知处理程序代码
+	*pResult = 0;
+
+	UpdateData(TRUE);
+
+	m_nViewWidth += (int)pNMUpDown->iDelta * 10;
+	if(m_nViewWidth<60) 
+		m_nViewWidth = 60;
+	if(m_nViewWidth>600)
+		m_nViewWidth = 600;
+
+	UpdateData(FALSE);
+}
+
+
+void CbinocularCameraDlg::OnDeltaposSpinviewheight(NMHDR *pNMHDR, LRESULT *pResult)
+{
+	LPNMUPDOWN pNMUpDown = reinterpret_cast<LPNMUPDOWN>(pNMHDR);
+	// TODO: 在此添加控件通知处理程序代码
+	*pResult = 0;
+
+	UpdateData(TRUE);
+
+	m_nViewHeight += (int)pNMUpDown->iDelta * 10;
+	if(m_nViewHeight<40) 
+		m_nViewHeight = 40;
+	if(m_nViewHeight>400)
+		m_nViewHeight = 400;
+
+	UpdateData(FALSE);
+}
+
+
+void CbinocularCameraDlg::OnDeltaposSpinviewdepth(NMHDR *pNMHDR, LRESULT *pResult)
+{
+	LPNMUPDOWN pNMUpDown = reinterpret_cast<LPNMUPDOWN>(pNMHDR);
+	// TODO: 在此添加控件通知处理程序代码
+	*pResult = 0;
+
+	UpdateData(TRUE);
+
+	m_nViewDepth += (int)pNMUpDown->iDelta * 10;
+	if(m_nViewDepth<60) 
+		m_nViewDepth = 60;
+	if(m_nViewDepth>600)
+		m_nViewDepth = 600;
+
+	UpdateData(FALSE);
+}
+
+CString CbinocularCameraDlg::F_InitWorkDir()
+{
+	CStringA strPath;
+	TCHAR path[_MAX_PATH];
+	TCHAR drive[_MAX_DRIVE];
+	TCHAR dir[_MAX_DIR];
+	TCHAR fname[_MAX_FNAME];
+	TCHAR ext[_MAX_EXT];
+	::GetModuleFileName(AfxGetApp()->m_hInstance, path, _MAX_PATH);
+	_tsplitpath(path, drive, dir, fname, ext);
+
+	strPath.Empty();
+	strPath += CString(drive);
+	strPath += CString(dir); 
+
+	string saveDir = strPath;
+	saveDir += "/Imgs";
+	F_CheckDir(saveDir, true);
+	saveDir += "/SaveFrame";
+	F_CheckDir(saveDir, true);
+
+	return CString(strPath);
+}
+
+bool CbinocularCameraDlg::F_CheckDir(const string dir, bool creatDir /*= false*/)
+{
+	bool RetVal = false;
+
+	string fileName = dir;
+	fileName += "\\*";
+
+	_finddata_t FileInfo;
+	long Handle = _findfirst(fileName.c_str(), &FileInfo);	
+
+	if (Handle == -1L)
+	{
+		if (creatDir)
+		{
+			if(_mkdir(dir.c_str())==0)
+			{
+				RetVal = true;
+			}
+		}
+	}
+	else
+	{
+		RetVal = true;
+		_findclose(Handle);
+	}
+
+	return RetVal;
 }

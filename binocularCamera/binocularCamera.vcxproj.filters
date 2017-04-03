@@ -51,6 +51,9 @@
     <ClInclude Include="StereoMatch.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="PointCloudAnalyzer.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="binocularCamera.cpp">
@@ -72,6 +75,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="StereoMatch.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="PointCloudAnalyzer.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
