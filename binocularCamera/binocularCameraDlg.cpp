@@ -45,6 +45,10 @@ CbinocularCameraDlg::CbinocularCameraDlg(CWnd* pParent /*=NULL*/)
 	, m_nViewWidth(200)
 	, m_nViewHeight(200)
 	, m_nViewDepth(200)
+	, m_ObjectWidth(0)
+	, m_ObjectHeight(0)
+	, m_ObjectDistance(0)
+	, m_ObjectDisparity(0)
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 }
@@ -102,6 +106,10 @@ void CbinocularCameraDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_SPIN_viewWidth, m_spinViewWidth);
 	DDX_Control(pDX, IDC_SPIN_viewHeight, m_spinViewHeight);
 	DDX_Control(pDX, IDC_SPIN_viewDepth, m_spinViewDepth);
+	DDX_Text(pDX, IDC_e5LfObjSpan, m_ObjectWidth);
+	DDX_Text(pDX, IDC_e6ObjPRLX, m_ObjectHeight);
+	DDX_Text(pDX, IDC_e7ObjDist, m_ObjectDistance);
+	DDX_Text(pDX, IDC_e8ObjSize, m_ObjectDisparity);
 }
 
 BEGIN_MESSAGE_MAP(CbinocularCameraDlg, CDialogEx)
@@ -1497,7 +1505,7 @@ bool CbinocularCameraDlg::DoParseOptionsOfStereoMatch(OptionStereoMatch& opt)
 	}
 
 	// 确认计算视差的算法
-	m_nID_RAD = GetCheckedRadioButton(IDC_RAD_BM, IDC_RAD_SGBM);
+	m_nID_RAD = GetCheckedRadioButton(IDC_RAD_SGBM, IDC_RAD_BM);
 	opt.stereoMethod = m_nID_RAD == IDC_RAD_BM ? STEREO_BM :
 		m_nID_RAD == IDC_RAD_SGBM ? STEREO_SGBM : STEREO_BM;
 	// 确认左右视图的来源（摄像头 or 本地图片）
@@ -1634,7 +1642,7 @@ void CbinocularCameraDlg::OnDeltaposSpinSadwinsiz(NMHDR *pNMHDR, LRESULT *pResul
 	// TODO: 在此添加控件通知处理程序代码
 	*pResult = 0;
 
-	m_nID_RAD = GetCheckedRadioButton(IDC_RAD_BM, IDC_RAD_SGBM);
+	m_nID_RAD = GetCheckedRadioButton(IDC_RAD_SGBM, IDC_RAD_BM);
 	if (m_nID_RAD == IDC_RAD_BM)
 	{
 		UpdateData(TRUE);
@@ -1667,7 +1675,7 @@ void CbinocularCameraDlg::OnDeltaposSpinspeckrange(NMHDR *pNMHDR, LRESULT *pResu
 	LPNMUPDOWN pNMUpDown = reinterpret_cast<LPNMUPDOWN>(pNMHDR);
 	// TODO: 在此添加控件通知处理程序代码
 	*pResult = 0;
-	m_nID_RAD = GetCheckedRadioButton(IDC_RAD_BM, IDC_RAD_SGBM);
+	m_nID_RAD = GetCheckedRadioButton(IDC_RAD_SGBM, IDC_RAD_BM);
 	if (m_nID_RAD == IDC_RAD_BM)
 	{
 		UpdateData(TRUE);
