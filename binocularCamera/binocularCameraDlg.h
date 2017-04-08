@@ -10,7 +10,8 @@
 #include "StereoMatch.h"
 #include "PointCloudAnalyzer.h"
 
-#include <opencv.hpp>
+#include "opencv2/imgproc/imgproc.hpp"
+#include "opencv2/highgui/highgui.hpp"
 #include "afxcmn.h"
 #include "stdlib.h"
 #include <vector>

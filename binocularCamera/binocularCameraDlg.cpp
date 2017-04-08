@@ -344,8 +344,8 @@ void CbinocularCameraDlg::OnCbnSelchangeCbnResolution()
 	switch (index)
 	{
 	case 0:
-		m_nImageWidth = 2048;
-		m_nImageHeight = 1536;
+		m_nImageWidth = 1280;
+		m_nImageHeight = 1024;
 		break;
 	case 1:
 		m_nImageWidth = 640;

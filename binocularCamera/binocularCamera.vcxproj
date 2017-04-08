@@ -46,8 +46,8 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>d:\OpenCV-2.4.4\build\include;d:\OpenCV-2.4.4\build\include\opencv;d:\OpenCV-2.4.4\build\include\opencv2;DirectShow/Include;$(IncludePath)</IncludePath>
-    <LibraryPath>d:\OpenCV-2.4.4\build\x86\vc10\lib;DirectShow/Lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>d:\OpenCV-2.4.4\build\include;d:\OpenCV-2.4.4\build\include\opencv;d:\OpenCV-2.4.4\build\include\opencv2;$(IncludePath);DirectShow/Include</IncludePath>
+    <LibraryPath>d:\OpenCV-2.4.4\build\x86\vc10\lib;$(LibraryPath);DirectShow/Lib</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -55,6 +55,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_WINDOWS;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
