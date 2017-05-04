@@ -113,7 +113,7 @@ void PointCloudAnalyzer::parseCandidates(cv::Mat& objects, cv::Mat& depthMap, ve
 	{
 		cv::Mat contour = cv::Mat( contours[objID] );
 		double area = contourArea( contour );
-		if ( area > areaThresh ) // 面积大于 100 像素时，才有效
+		if ( area > areaThresh/*500*/ ) // 面积大于 100 像素时，才有效
 		{
 			ObjectInfo object;
 
@@ -164,13 +164,18 @@ void PointCloudAnalyzer::parseCandidates(cv::Mat& objects, cv::Mat& depthMap, ve
  */
 void PointCloudAnalyzer::showObjectInfo(vector<ObjectInfo>& objectInfos, cv::Mat& outImage)
 {
-	int showCount = objectInfos.size() < 5 ? objectInfos.size() : 5;
+	int showCount = objectInfos.size() < 10 ? objectInfos.size() : 10;
 	
 	// 画出所有靠近的物体
 	for (int i = 0; i < showCount; i++)
 	{
 		//物体中心
 		circle(outImage, objectInfos[i].center, 3, CV_RGB(0,0,255), 2);
+		stringstream ss;
+		string str;
+		ss << int(objectInfos[i].distance);
+		ss>>str;
+		showText(outImage, str, objectInfos[i].center);
 		
 		//物体最小矩形
 		cv::Point2f rect_points[4]; 
@@ -186,5 +191,35 @@ void PointCloudAnalyzer::showObjectInfo(vector<ObjectInfo>& objectInfos, cv::Mat
 				line( outImage, rect_points[j], rect_points[(j+1)%4], CV_RGB(255-i*40,i*40,0), 2 );
 		}
 	}
+}
+
+void PointCloudAnalyzer::showText(cv::Mat& img, string text, cv::Point pt)
+{
+	int fontFace = cv::FONT_HERSHEY_PLAIN;
+	double fontScale = 5;
+	int fontThickness = 2;
+
+	// get text size
+	int textBaseline=0;
+	cv::Size textSize = cv::getTextSize(text, fontFace,
+		fontScale, fontThickness, &textBaseline);
+	textBaseline += fontThickness;
+
+	// put the text at a certain position
+	cv::Point textOrg(pt);
+
+	/* // draw the box
+	rectangle(img, textOrg + cv::Point(0, textBaseline),
+		textOrg + cv::Point(textSize.width, -textSize.height),
+		cv::Scalar(0,255,0));
+
+	// ... and the textBaseline first
+	line(img, textOrg + cv::Point(0, fontThickness),
+		textOrg + cv::Point(textSize.width, fontThickness),
+		cv::Scalar(0,255,0));*/
+
+	// then put the text itself
+	putText(img, text, textOrg, fontFace, fontScale,
+		cv::Scalar(0,0,255), fontThickness, 8);
 }
 

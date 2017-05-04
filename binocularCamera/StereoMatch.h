@@ -141,7 +141,7 @@ public:
     void getTopDownView(cv::Mat& pointClouds, cv::Mat& topDownView, cv::Mat& image = cv::Mat());
     
 	/*----------------------------
-	 * 功能 : 获取环境俯视图
+	 * 功能 : 获取环境侧视图
 	 *----------------------------
 	 * 函数 : StereoMatch::savePointClouds
 	 * 访问 : public 

@@ -111,6 +111,17 @@ private:
 	 * 参数 : outImage		[io]	左摄像头图像，在该图像上绘制近距物体信息
 	 */
 	void showObjectInfo(vector<ObjectInfo>& objectInfos, cv::Mat& outImage);
+	/*----------------------------
+	 * 功能 : 在图像指定位置显示指定文字信息
+	 *----------------------------
+	 * 函数 : PointCloudAnalyzer::showText
+	 * 访问 : private 
+	 * 返回 : void
+	 *
+	 * 参数 : img	[in]	图像
+	 * 参数 : text	[in]	文字信息
+	 */
+	void showText(cv::Mat& img, string text, cv::Point pt);
 
 };
 

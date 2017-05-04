@@ -28,7 +28,7 @@ CbinocularCameraDlg::CbinocularCameraDlg(CWnd* pParent /*=NULL*/)
 	, m_nCornerSize_X(9)
 	, m_nCornerSize_Y(6)
 	, m_nSquareSize(26.0f)
-	, m_nBoards(10)
+	, m_nBoards(20)
 	, m_dAlpha(-1)
 	, m_nMinDisp(0)
 	, m_nMaxDisp(0)
@@ -345,7 +345,7 @@ void CbinocularCameraDlg::OnCbnSelchangeCbnResolution()
 	{
 	case 0:
 		m_nImageWidth = 1280;
-		m_nImageHeight = 1024;
+		m_nImageHeight = 960;
 		break;
 	case 1:
 		m_nImageWidth = 640;
@@ -1365,6 +1365,7 @@ void CbinocularCameraDlg::OnBnClickedBnCompdisp()
 
 			// 传送至MFC界面显示
 			F_ShowImage( img1p, m_lfImage, IDC_PicLfCam );
+			F_ShowImage(img1p, m_lfImage, IDC_PicLfCam2);
 			F_ShowImage( img2p, m_riImage, IDC_PicRiCam );
 			F_ShowImage( disp8u, m_disparity, IDC_PicSynImg );	
 
